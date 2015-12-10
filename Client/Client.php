@@ -4,6 +4,7 @@ namespace Kptive\PaymentSipsBundle\Client;
 
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Process\Process;
+use Symfony\Component\Process\ProcessBuilder;
 use Kptive\PaymentSipsBundle\Exception\PaymentRequestException;
 
 class Client
@@ -39,10 +40,15 @@ class Client
     public function run($bin, $args)
     {
         if (!is_file($bin)) {
-            throw new \InvalidArgumentException(sprintf('Binary %s not found', $bin));
+            throw new \InvalidArgumentException(sprintf('Binary "%s" not found', $bin));
         }
 
-        $process = new Process(sprintf('"%s" %s', $bin, escapeshellcmd($this->arrayToArgsString($args))));
+        $processBuilder = new ProcessBuilder(array($bin));
+        foreach ($this->arrayToArgsString($args) as $arg) {
+            $processBuilder->add($arg);
+        }
+
+        $process = $processBuilder->getProcess();
         $process->run();
 
         if (!$process->isSuccessful()) {
@@ -78,22 +84,18 @@ class Client
 
     /**
      * @param  array  $args
-     * @return string
+     * @return array
      */
     protected function arrayToArgsString($args)
     {
-        if (is_string($args)) {
-            return $args;
-        }
-
-        $str = '';
+        $arr = array();
         foreach ($args as $key => $val) {
-            if (is_numeric($val) or $val) {
-                $str .= sprintf('%s=%s ', $key, escapeshellarg($val));
+            if (is_numeric($val) || $val) {
+                $arr[] = sprintf('%s=%s', $key, $val);
             }
         }
 
-        return trim($str);
+        return $arr;
     }
 
     /**
@@ -104,7 +106,7 @@ class Client
     {
         $args = array_merge($this->config, $config);
 
-        $output = $this->run($this->binaries['request_bin'], $this->arrayToArgsString($args));
+        $output = $this->run($this->binaries['request_bin'], $args);
 
         return $this->handleRequestOutput($output);
     }
@@ -120,7 +122,7 @@ class Client
             'pathfile' => $this->config['pathfile'],
         );
 
-        $output = $this->run($this->binaries['response_bin'], $this->arrayToArgsString($args));
+        $output = $this->run($this->binaries['response_bin'], $args);
 
         list(
             $result['code'],

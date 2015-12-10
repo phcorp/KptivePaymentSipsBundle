@@ -7,7 +7,6 @@ namespace Kptive\PaymentSipsBundle\Tests\Client;
  */
 class ClientTest extends \PHPUnit_Framework_TestCase
 {
-
     private $client;
 
     public function setUp()
