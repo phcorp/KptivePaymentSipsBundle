@@ -1,8 +1,8 @@
 KptivePaymentSipsBundle
 =======================
 
-[![Build Status](https://secure.travis-ci.org/KptiveStudio/KptivePaymentSipsBundle.png?branch=master)](http://travis-ci.org/KptiveStudio/KptivePaymentSipsBundle)
-
+[![Build Status](https://secure.travis-ci.org/phcorp/KptivePaymentSipsBundle.svg?branch=master)](http://travis-ci.org/phcorp/KptivePaymentSipsBundle)
+[![SensioLabs Insight](https://img.shields.io/sensiolabs/i/88a429c7-37d7-4b1d-8280-8d1d0ee73e03.svg)](https://insight.sensiolabs.com/projects/88a429c7-37d7-4b1d-8280-8d1d0ee73e03)
 
 The `KptivePaymentSipsBundle` provides access to the Atos Worldline SIPS payment solution through
 the [JMSPaymentCoreBundle](https://github.com/schmittjoh/JMSPaymentCoreBundle).
@@ -377,7 +377,6 @@ check the ownership of the order!
 Credits
 -------
 
-* KptiveStudio <http://kptivestudio.com>
 * Hubert Moutot <hubert.moutot@gmail.com>
 
 A great thank you to Johannes M Schmitt for his awesome JMSPayementCoreBundle.

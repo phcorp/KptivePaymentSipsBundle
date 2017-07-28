@@ -8,7 +8,7 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 class Configuration implements ConfigurationInterface
 {
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getConfigTreeBuilder()
     {
@@ -26,8 +26,6 @@ class Configuration implements ConfigurationInterface
                                 ->defaultValue('%kernel.root_dir%/config/sips/param/pathfile')
                             ->end()
                             ->scalarNode('templatefile')->defaultValue(null)->end()
-                            //->scalarNode('default_language')->isRequired()->cannotBeEmpty()->end()
-                            //->scalarNode('default_template_file')->defaultValue(null)->end()
                             ->scalarNode('currency_code')->cannotBeEmpty()->defaultValue(978)->end()
                             ->scalarNode('normal_return_url')->cannotBeEmpty()->defaultValue('%base_url%/payment/sips/back')->end()
                             ->scalarNode('cancel_return_url')->cannotBeEmpty()->defaultValue('%base_url%/payment/sips/back')->end()

@@ -2,6 +2,7 @@
 
 namespace Kptive\PaymentSipsBundle\Plugin;
 
+use JMS\Payment\CoreBundle\Model\PaymentInstructionInterface;
 use JMS\Payment\CoreBundle\PluginController\PluginControllerInterface;
 use JMS\Payment\CoreBundle\PluginController\Result;
 
@@ -10,14 +11,13 @@ use JMS\Payment\CoreBundle\PluginController\Result;
  */
 class ReturnHandler
 {
-
     /**
      * @var PluginControllerInterface
      */
     protected $pluginController;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param PluginControllerInterface $pluginController a PluginControllerInterface instance
      */
@@ -27,14 +27,14 @@ class ReturnHandler
     }
 
     /**
-     * Processes the payment
+     * Processes the payment.
      *
-     * @param PaymentInstruction $instruction the PaymentInstruction to handle
-     * @param array              $data        the decrypted response data
+     * @param PaymentInstructionInterface $instruction the PaymentInstruction to handle
+     * @param array                       $data        the decrypted response data
      *
      * @return Result
      */
-    public function handle($instruction, $data)
+    public function handle(PaymentInstructionInterface $instruction, $data)
     {
         if (null === $pendingTransaction = $instruction->getPendingTransaction()) {
             $payment = $this->pluginController->createPayment($instruction->getId(), $instruction->getAmount() - $instruction->getDepositedAmount());

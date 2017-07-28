@@ -7,18 +7,21 @@ use JMS\Payment\CoreBundle\Entity\ExtendedData;
 use JMS\Payment\CoreBundle\Model\FinancialTransactionInterface;
 use JMS\Payment\CoreBundle\Plugin\PluginInterface;
 use Kptive\PaymentSipsBundle\Plugin\SipsPlugin;
+use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
+use JMS\Payment\CoreBundle\Plugin\Exception\FinancialException;
 
 /**
  * @author Hubert Moutot <hubert.moutot@gmail.com>
  */
-class SipsPluginTest extends \PHPUnit_Framework_TestCase
+class SipsPluginTest extends TestCase
 {
-
+    /** @var SipsPlugin */
     private $sipsPlugin;
 
     public function setUp()
     {
-        $logger = $this->getMockBuilder('Psr\Log\LoggerInterface')
+        $logger = $this->getMockBuilder(LoggerInterface::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -41,10 +44,8 @@ class SipsPluginTest extends \PHPUnit_Framework_TestCase
             $transaction->getExtendedData()->set($key, $val);
         }
 
-        $this->setExpectedException(
-            'JMS\Payment\CoreBundle\Plugin\Exception\FinancialException',
-            'Payment failed with error code -1. Error: Payment failed'
-        );
+        $this->expectException(FinancialException::class);
+        $this->expectExceptionMessage('Payment failed with error code -1. Error: Payment failed');
 
         $this->sipsPlugin->approveAndDeposit($transaction, false);
 

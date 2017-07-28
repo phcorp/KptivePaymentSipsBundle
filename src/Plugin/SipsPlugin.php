@@ -20,6 +20,7 @@ class SipsPlugin extends AbstractPlugin
 
     public function __construct(LoggerInterface $logger)
     {
+        parent::__construct();
         $this->logger = $logger;
     }
 
@@ -32,34 +33,37 @@ class SipsPlugin extends AbstractPlugin
     {
         $data = $transaction->getExtendedData();
 
-        if (0 != $data->get('code')) {
+        if (0 !== (int) $data->get('code')) {
             $transaction->setResponseCode(self::RESPONSE_CODE_FAILED);
             $transaction->setReasonCode($data->get('error'));
             $transaction->setState(FinancialTransactionInterface::STATE_FAILED);
 
             $this->logger->info(sprintf('Payment failed with error code %s. Error: %s', $data->get('code'), $data->get('error')));
 
-            $ex = new FinancialException(sprintf('Payment failed with error code %s. Error: %s', $data->get('code'), $data->get('error')));
-            $ex->setFinancialTransaction($transaction);
-            throw $ex;
+            $exception = new FinancialException(sprintf('Payment failed with error code %s. Error: %s', $data->get('code'), $data->get('error')));
+            $exception->setFinancialTransaction($transaction);
+            throw $exception;
         }
 
         $transaction->setReferenceNumber($data->get('order_id'));
 
-        if (17 == $data->get('response_code')) {
+        if (17 === (int) $data->get('response_code')) {
             $transaction->setResponseCode(self::RESPONSE_CODE_CANCELED);
             $transaction->setReasonCode('Payment canceled');
-        } elseif (0 != $data->get('response_code')) {
+
+            return;
+        }
+        if (0 !== (int) $data->get('response_code')) {
             $transaction->setResponseCode(self::RESPONSE_CODE_FAILED);
             $transaction->setReasonCode(sprintf('Response code: %s', $data->get('response_code')));
 
             $this->logger->info(sprintf('Payment failed with error response_code %s. Error: %s', $data->get('response_code'), $data->get('error')));
-        } else {
-            $transaction->setResponseCode(PluginInterface::RESPONSE_CODE_SUCCESS);
-            $transaction->setReasonCode(PluginInterface::REASON_CODE_SUCCESS);
 
-            $transaction->setProcessedAmount($data->get('amount') / 100);
+            return;
         }
-    }
+        $transaction->setResponseCode(PluginInterface::RESPONSE_CODE_SUCCESS);
+        $transaction->setReasonCode(PluginInterface::REASON_CODE_SUCCESS);
 
+        $transaction->setProcessedAmount($data->get('amount') / 100);
+    }
 }

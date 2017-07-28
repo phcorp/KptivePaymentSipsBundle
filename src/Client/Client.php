@@ -18,7 +18,7 @@ class Client
     protected $config;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param LoggerInterface $logger   a LoggerInterface instance
      * @param array           $binaries an array containing the request_bin and the response_bin
@@ -32,9 +32,13 @@ class Client
     }
 
     /**
-     * @param  string $bin
-     * @param  array  $args
+     * @param string       $bin
+     * @param string|array $args
+     *
      * @return string
+     *
+     * @throws \InvalidArgumentException
+     * @throws \RuntimeException
      */
     public function run($bin, $args)
     {
@@ -56,8 +60,11 @@ class Client
     }
 
     /**
-     * @param  string $output
+     * @param string $output
+     *
      * @return string
+     *
+     * @throws \Kptive\PaymentSipsBundle\Exception\PaymentRequestException
      */
     protected function handleRequestOutput($output)
     {
@@ -65,19 +72,21 @@ class Client
 
         if ('' === $code && '' === $error) {
             throw new PaymentRequestException(sprintf('SIPS Request failed. Output: %s', $output));
-        } elseif ('0' !== $code) {
+        }
+        if ('0' !== $code) {
             throw new PaymentRequestException(sprintf('SIPS Request failed with the following error: %s', $error));
         }
 
         if (!$message) {
-            throw new PaymentException(sprintf('SIPS Output message missing. Output: %s', $output));
+            throw new PaymentRequestException(sprintf('SIPS Output message missing. Output: %s', $output));
         }
 
         return $message;
     }
 
     /**
-     * @param  array  $args
+     * @param string|array $args
+     *
      * @return string
      */
     protected function arrayToArgsString($args)
@@ -88,7 +97,7 @@ class Client
 
         $str = '';
         foreach ($args as $key => $val) {
-            if (is_numeric($val) or $val) {
+            if (is_numeric($val) || $val) {
                 $str .= sprintf('%s=%s ', $key, escapeshellarg($val));
             }
         }
@@ -97,7 +106,8 @@ class Client
     }
 
     /**
-     * @param  array  $config
+     * @param array $config
+     *
      * @return string
      */
     public function request($config)
@@ -110,15 +120,16 @@ class Client
     }
 
     /**
-     * @param  string $data the raw response
+     * @param string $data the raw response
+     *
      * @return array
      */
     public function handleResponseData($data)
     {
-        $args = array(
+        $args = [
             'message' => $data,
             'pathfile' => $this->config['pathfile'],
-        );
+        ];
 
         $output = $this->run($this->binaries['response_bin'], $this->arrayToArgsString($args));
 
@@ -168,5 +179,4 @@ class Client
 
         return $result;
     }
-
 }

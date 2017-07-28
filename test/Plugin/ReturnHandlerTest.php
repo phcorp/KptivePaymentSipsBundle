@@ -10,15 +10,18 @@ use JMS\Payment\CoreBundle\Entity\PaymentInstruction;
 use JMS\Payment\CoreBundle\Plugin\PluginInterface;
 use JMS\Payment\CoreBundle\PluginController\Result;
 use Kptive\PaymentSipsBundle\Plugin\ReturnHandler;
+use PHPUnit\Framework\TestCase;
+use JMS\Payment\CoreBundle\PluginController\EntityPluginController;
 
 /**
  * @author Hubert Moutot <hubert.moutot@gmail.com>
  */
-class ReturnHandlerTest extends \PHPUnit_Framework_TestCase
+class ReturnHandlerTest extends TestCase
 {
-
+    /** @var ReturnHandler */
     private $returnHandler;
 
+    /** @var EntityPluginController|\PHPUnit_Framework_MockObject_MockObject */
     private $ppc;
 
     public function setUp()
@@ -57,12 +60,10 @@ class ReturnHandlerTest extends \PHPUnit_Framework_TestCase
 
     public function getPluginControllerMock()
     {
-        $ppc = $this->getMockBuilder('JMS\Payment\CoreBundle\PluginController\EntityPluginController')
+        return $this->getMockBuilder(EntityPluginController::class)
             ->disableOriginalConstructor()
             ->setMethods(array('approveAndDeposit'))
             ->getMock();
-
-        return $ppc;
     }
 
     protected function createTransaction($amount, $currency)
@@ -78,5 +79,4 @@ class ReturnHandlerTest extends \PHPUnit_Framework_TestCase
 
         return $transaction;
     }
-
 }

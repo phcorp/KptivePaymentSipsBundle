@@ -2,24 +2,32 @@
 
 namespace Kptive\PaymentSipsBundle\Tests\Client;
 
+use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
+use Kptive\PaymentSipsBundle\Client\Client;
+use Kptive\PaymentSipsBundle\Exception\PaymentRequestException;
+
 /**
  * @author Hubert Moutot <hubert.moutot@gmail.com>
  */
-class ClientTest extends \PHPUnit_Framework_TestCase
+class ClientTest extends TestCase
 {
-
+    /** @var Client|\PHPUnit_Framework_MockObject_MockObject */
     private $client;
 
     public function setUp()
     {
-        $logger = $this->getMockBuilder('Psr\Log\LoggerInterface')
+        $logger = $this->getMockBuilder(LoggerInterface::class)
             ->disableOriginalConstructor()
             ->getMock();
 
         $bin = array('request_bin' => '', 'response_bin' => '');
         $config = array('pathfile' => '');
 
-        $this->client = $this->getMock('Kptive\PaymentSipsBundle\Client\Client', array('run'), array($logger, $bin, $config));
+        $this->client = $this->getMockBuilder(Client::class)
+            ->setMethods(array('run'))
+            ->setConstructorArgs(array($logger, $bin, $config))
+            ->getMock();
     }
 
     public function testRequestFailed()
@@ -29,10 +37,8 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             ->method('run')
             ->will($this->returnValue('!-1!wrong card number!!'));
 
-        $this->setExpectedException(
-            'Kptive\PaymentSipsBundle\Exception\PaymentRequestException',
-            'SIPS Request failed with the following error: wrong card number'
-        );
+        $this->expectException(PaymentRequestException::class);
+        $this->expectExceptionMessage('SIPS Request failed with the following error: wrong card number');
 
         $result = $this->client->request(array('amount' => 10000));
     }
@@ -44,10 +50,8 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             ->method('run')
             ->will($this->returnValue('!!!!'));
 
-        $this->setExpectedException(
-            'Kptive\PaymentSipsBundle\Exception\PaymentRequestException',
-            'SIPS Request failed. Output: !!!!'
-        );
+        $this->expectException(PaymentRequestException::class);
+        $this->expectExceptionMessage('SIPS Request failed. Output: !!!!');
 
         $result = $this->client->request(array('amount' => 10000));
     }
@@ -120,5 +124,4 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($expected, $result);
     }
-
 }
